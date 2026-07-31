@@ -159,56 +159,126 @@ FastAPI Backend
 **AI Services:** Google Gemini, RAG
 **Tooling:** Git, Docker, Jupyter, VS Code
 
----
-
-## 📂 Project Structure
-
-```text
 TruthLensAI/
 │
-├── 📁 ai/                                  # AI models, datasets & notebooks
+├── 📁 ai/                                      # AI models, datasets & notebooks
 │   ├── datasets/
+│   │   ├── raw/
+│   │   │   └── welfake.csv
+│   │   └── processed/
+│   │       ├── train.csv
+│   │       ├── val.csv
+│   │       └── test.csv
+│   │
 │   ├── notebooks/
+│   │   ├── 01_eda.ipynb
+│   │   ├── 02_preprocessing.ipynb
+│   │   ├── 03_feature_engineering.ipynb
+│   │   ├── 04_ml_models.ipynb
+│   │   ├── 05_dl_models.ipynb
+│   │   ├── 06_transformer_models.ipynb
+│   │   └── 07_model_comparison.ipynb
+│   │
 │   ├── models/
+│   │   ├── ml/
+│   │   │   ├── logistic_regression.pkl
+│   │   │   ├── linear_svm.pkl
+│   │   │   └── xgboost.pkl
+│   │   ├── dl/
+│   │   │   ├── cnn.h5
+│   │   │   ├── lstm.h5
+│   │   │   ├── bilstm.h5
+│   │   │   └── gru.h5
+│   │   └── transformers/
+│   │       ├── bert/
+│   │       ├── distilbert/
+│   │       └── roberta/                        # production model
+│   │
 │   ├── preprocessing/
+│   │   ├── clean_text.py
+│   │   ├── tokenizer.py
+│   │   └── feature_engineering.py
+│   │
 │   ├── evaluation/
+│   │   ├── metrics.py
+│   │   ├── confusion_matrix.py
+│   │   ├── roc_curve.py
+│   │   └── model_comparison_report.py
+│   │
 │   ├── predictor.py
 │   ├── model_loader.py
 │   └── requirements.txt
 │
-├── 📁 backend/                             # FastAPI Backend
+├── 📁 backend/                                 # FastAPI Backend
 │   ├── app/
 │   │   ├── api/
+│   │   │   ├── routes/
+│   │   │   │   ├── predict.py
+│   │   │   │   └── history.py
+│   │   │   └── deps.py
 │   │   ├── services/
+│   │   │   ├── prediction_service.py
+│   │   │   ├── retrieval_service.py
+│   │   │   ├── rag_controller.py
+│   │   │   └── gemini_service.py
 │   │   ├── models/
+│   │   │   └── db_models.py
 │   │   ├── schemas/
+│   │   │   ├── request_schema.py
+│   │   │   └── response_schema.py
 │   │   ├── utils/
+│   │   │   ├── preprocessing.py
+│   │   │   ├── logger.py
+│   │   │   └── config.py
 │   │   └── main.py
+│   ├── tests/
+│   │   ├── test_predict.py
+│   │   └── test_services.py
 │   ├── requirements.txt
 │   └── Dockerfile
 │
-├── 📁 frontend/                            # React Frontend
+├── 📁 frontend/                                # React Frontend
 │   ├── public/
+│   │   └── favicon.svg
 │   ├── src/
 │   │   ├── assets/
 │   │   ├── components/
+│   │   │   ├── Dashboard/
+│   │   │   ├── PredictionForm/
+│   │   │   ├── ConfidenceChart/
+│   │   │   ├── EvidencePanel/
+│   │   │   └── HistoryTable/
 │   │   ├── pages/
+│   │   │   ├── Home.tsx
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── Analytics.tsx
+│   │   │   └── History.tsx
 │   │   ├── services/
+│   │   │   └── api.ts
 │   │   ├── hooks/
+│   │   │   └── usePrediction.ts
 │   │   ├── utils/
+│   │   │   └── formatters.ts
 │   │   ├── App.tsx
 │   │   └── main.tsx
 │   ├── package.json
 │   └── Dockerfile
 │
 ├── 📁 docs/
+│   ├── architecture.md
+│   └── api_reference.md
+│
 ├── 📁 screenshots/
+│   ├── landing.png
+│   ├── dashboard.png
+│   ├── prediction.png
+│   ├── analytics.png
+│   └── history.png
+│
 ├── docker-compose.yml
 ├── README.md
 └── LICENSE
-```
 
----
 
 ## 🚀 Quick Start
 
