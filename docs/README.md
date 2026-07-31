@@ -1,16 +1,18 @@
 <div align="center">
 
 # 🛡️ TruthLens AI
+### Fake News Detection using Machine Learning, Deep Learning & Transformer Models
 
-### AI-Powered Fake News Detection using Transformers, Agentic AI & Retrieval-Augmented Generation (RAG)
+![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi)
+![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?logo=pytorch)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?logo=tensorflow)
+![Transformers](https://img.shields.io/badge/HuggingFace-Transformers-yellow)
+![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-F7931E?logo=scikitlearn)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-[![React](https://img.shields.io/badge/React-19-blue.svg)]()
-[![FastAPI](https://img.shields.io/badge/FastAPI-Backend-green.svg)]()
-[![Python](https://img.shields.io/badge/Python-3.11-yellow.svg)]()
-[![RoBERTa](https://img.shields.io/badge/Model-RoBERTa-red.svg)]()
-[![License](https://img.shields.io/badge/License-Academic-orange.svg)]()
-
-**An end-to-end AI platform that detects fake news, retrieves supporting evidence, and generates explainable verification using Agentic AI and Google Gemini.**
+**A comparative NLP study of 10 ML/DL/Transformer models for fake news detection, deployed as a full-stack app with explainable, evidence-backed predictions.**
 
 🌐 **Live Demo:** https://truth-lens-ai-ten.vercel.app
 
@@ -18,276 +20,268 @@
 
 ---
 
-# 📖 Overview
+## 📖 Overview
 
-TruthLens AI is an intelligent fake news verification platform designed to go beyond binary text classification.
+TruthLens AI evaluates and compares **10 Machine Learning, Deep Learning, and Transformer models** for fake news classification, trained on the **WELFake dataset**. The best-performing model (**RoBERTa, 97.61% accuracy**) is deployed via a React + FastAPI app, enhanced with **Retrieval-Augmented Generation (RAG)** and **Google Gemini** for evidence-supported, explainable predictions rather than a plain binary output.
 
-Instead of simply predicting whether a news article is **Real** or **Fake**, TruthLens AI combines:
+## 🔄 Project Flow
 
-- Transformer-based fake news detection
-- Agentic AI orchestration
-- Retrieval-Augmented Generation (RAG)
-- Trusted evidence retrieval
-- Explainable AI reasoning
-
-to produce an **evidence-supported verification report**.
-
----
-
-# ✨ Features
-
-- 🤖 Fine-tuned RoBERTa Fake News Detector
-- 🧠 Agentic AI Verification Pipeline
-- 🔍 Retrieval-Augmented Generation (RAG)
-- 📚 Trusted Evidence Retrieval
-- 💬 Google Gemini Reasoning
-- 📈 Confidence Score Analysis
-- 📊 Interactive Dashboard
-- 📜 Verification History
-- 🌐 REST API
-- ⚡ Modern Responsive UI
-
----
-
-# 🏗️ Architecture
-
+```text
+Problem
+   ↓
+Dataset
+   ↓
+EDA
+   ↓
+Preprocessing
+   ↓
+Feature Engineering
+   ↓
+Model Training
+   ↓
+Hyperparameter Tuning
+   ↓
+Model Evaluation
+   ↓
+Model Comparison
+   ↓
+Best Model Selection
+   ↓
+Deployment
+   ↓
+Explainability (RAG)
 ```
+
+## 🎯 Objectives
+
+- Build an end-to-end fake news detection pipeline
+- Benchmark ML, DL, and Transformer architectures on a common preprocessing pipeline
+- Select and deploy the best-performing model
+- Add explainability via evidence retrieval and reasoning
+
+## ✨ Key Features
+
+- Comparative evaluation of 10 NLP models
+- Fine-tuned RoBERTa for production inference
+- Research mode (full pipeline/model comparison) & Production mode (fast inference)
+- Confidence score visualization + verification history
+- RAG-based evidence retrieval with Gemini reasoning
+- React + TypeScript frontend, FastAPI backend
+
+---
+
+## 📊 Dataset — WELFake
+
+| Property | Value |
+|---|---|
+| Total Articles | 72,134 |
+| Real News | 35,028 |
+| Fake News | 37,106 |
+| Task | Binary Classification |
+| Features | Title, Content, Label |
+
+## 📈 EDA & Preprocessing
+
+**EDA:** class distribution, missing/duplicate value checks, article length & word-frequency analysis, token statistics.
+
+**Preprocessing pipeline:** dedup → title/content merge → HTML/URL/special-char removal → lowercasing → whitespace normalization → tokenization → lemmatization. Applied identically across all models for fair comparison.
+
+---
+
+## 🤖 Models Evaluated
+
+**Machine Learning** (TF-IDF features): Logistic Regression, Linear SVM, XGBoost
+
+**Deep Learning** (learned embeddings): CNN, LSTM, BiLSTM, GRU
+
+**Transformers** (HuggingFace, fine-tuned): BERT, DistilBERT, **RoBERTa** ✅ *(selected)*
+
+**Evaluation metrics:** Accuracy, Precision, Recall, F1, ROC-AUC, Confusion Matrix, ROC Curve, Train/Val Loss
+
+### Why RoBERTa?
+Highest accuracy and ROC-AUC, strongest contextual/semantic understanding, lowest false positive/negative rates, best generalization — selected as the production inference engine.
+
+## 🔑 Key Findings
+
+- **RoBERTa was the clear winner**, reaching **97.61% accuracy** and **99.72% ROC-AUC** — the best across all 10 models tested.
+- **XGBoost was the strongest classical baseline** (~96.7% accuracy on TF-IDF features), proving competitive with early deep learning models despite far lower compute cost.
+- **Transformers > Deep Learning > Classical ML**, in that order, on this dataset — contextual embeddings captured nuances (sarcasm, phrasing, source style) that recurrent architectures and bag-of-words-style features missed.
+- **Diminishing but real gains from DL to Transformers**: RNN-based models (LSTM/BiLSTM/GRU) improved over TF-IDF baselines, but the jump to transformer architectures was the biggest single accuracy gain in the whole comparison.
+- **Confidence-gated RAG fallback** was the key architectural differentiator over a plain classifier: low-confidence predictions are automatically routed through evidence retrieval + Gemini reasoning instead of being returned as an unqualified label, directly addressing the black-box trust problem.
+
+## 🧠 Explainability & RAG
+
+Rather than a bare label, predictions are paired with retrieved supporting evidence and a Gemini-generated natural-language explanation:
+
+`Article → Preprocess → Semantic query → Evidence retrieval & ranking → Context construction → Gemini reasoning → Evidence-backed verdict`
+
+This reduces hallucination risk and improves user trust in the prediction.
+
+---
+
+## 🏗️ System Architecture
+
+The application follows a modular client-server architecture consisting of independent frontend, backend, AI inference, and reasoning components.
+
+```text
 User
-   │
-   ▼
+ │
+ ▼
 React Frontend
-   │
-   ▼
+ │
+ ▼
 FastAPI Backend
-   │
-   ├───────────── Prediction Service
-   │
-   ├───────────── Retrieval Service
-   │
-   ├───────────── Agentic AI Controller
-   │
-   └───────────── Google Gemini
-                    │
-                    ▼
-Evidence-supported Verification
-                    │
-                    ▼
-Dashboard
+ │
+ ├──────── Prediction Service
+ │
+ ├──────── RoBERTa Model
+ │
+ ├──────── Retrieval Service
+ │
+ ├──────── Agentic AI Controller
+ │
+ └──────── Google Gemini
+          │
+          ▼
+ Evidence-supported Verification
+          │
+          ▼
+ Interactive Dashboard
 ```
 
----
+## ⚙️ Tech Stack
 
-# 🧠 AI Models Evaluated
-
-| Category | Models |
-|----------|---------|
-| Machine Learning | Logistic Regression, Linear SVM, XGBoost |
-| Deep Learning | CNN, LSTM, BiLSTM, GRU |
-| Transformers | BERT, DistilBERT, **RoBERTa** |
-
----
-
-# 📊 Best Results
-
-| Model | Accuracy |
-|--------|----------|
-| Logistic Regression | 96.04% |
-| Linear SVM | 96.33% |
-| XGBoost | 96.77% |
-| CNN | 96.83% |
-| LSTM | 96.42% |
-| BiLSTM | 96.09% |
-| GRU | 96.91% |
-| BERT | 96.89% |
-| DistilBERT | 96.95% |
-| **RoBERTa** | **97.61%** |
+**Data Science / ML:** Python, Pandas, NumPy, Scikit-learn, TF-IDF
+**Deep Learning:** TensorFlow, Keras, PyTorch
+**NLP:** HuggingFace Transformers, Tokenizers
+**Backend:** FastAPI, Uvicorn, Pydantic
+**Frontend:** React 19, TypeScript, Vite, Tailwind CSS, shadcn/ui, Recharts
+**AI Services:** Google Gemini, RAG
+**Tooling:** Git, Docker, Jupyter, VS Code
 
 ---
 
-# 🔄 Verification Workflow
+## 📂 Project Structure
 
-```
-News Article
-      │
-      ▼
-Text Preprocessing
-      │
-      ▼
-RoBERTa Prediction
-      │
-      ▼
-Query Generation
-      │
-      ▼
-Evidence Retrieval
-      │
-      ▼
-Evidence Ranking
-      │
-      ▼
-Google Gemini
-      │
-      ▼
-Explainable Verification
-      │
-      ▼
-Dashboard
-```
-
----
-
-# 💻 Tech Stack
-
-### Frontend
-
-- React 19
-- TypeScript
-- Vite
-- Tailwind CSS
-- shadcn/ui
-
-### Backend
-
-- FastAPI
-- Python
-- REST API
-
-### AI
-
-- Scikit-learn
-- TensorFlow
-- PyTorch
-- HuggingFace Transformers
-- XGBoost
-
-### LLM
-
-- Google Gemini
-
----
-
-# 📂 Project Structure
-
-```
-TruthLensAI
+```text
+TruthLensAI/
 │
-├── ai/
-├── backend/
-├── frontend/
-├── docs/
+├── 📁 ai/                                  # AI models, datasets & notebooks
+│   ├── datasets/
+│   ├── notebooks/
+│   ├── models/
+│   ├── preprocessing/
+│   ├── evaluation/
+│   ├── predictor.py
+│   ├── model_loader.py
+│   └── requirements.txt
 │
+├── 📁 backend/                             # FastAPI Backend
+│   ├── app/
+│   │   ├── api/
+│   │   ├── services/
+│   │   ├── models/
+│   │   ├── schemas/
+│   │   ├── utils/
+│   │   └── main.py
+│   ├── requirements.txt
+│   └── Dockerfile
+│
+├── 📁 frontend/                            # React Frontend
+│   ├── public/
+│   ├── src/
+│   │   ├── assets/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   ├── hooks/
+│   │   ├── utils/
+│   │   ├── App.tsx
+│   │   └── main.tsx
+│   ├── package.json
+│   └── Dockerfile
+│
+├── 📁 docs/
+├── 📁 screenshots/
 ├── docker-compose.yml
 ├── README.md
-└── package.json
+└── LICENSE
 ```
 
 ---
 
-# 🚀 Getting Started
+## 🚀 Quick Start
 
-## Clone Repository
+**Prerequisites:** Python 3.10+, Node.js 18+, npm, Git, Docker *(optional)*
 
 ```bash
-git clone https://github.com/yugsaxena102/TruthLensAI.git
-
+git clone https://github.com/<your-username>/TruthLensAI.git
 cd TruthLensAI
-```
 
----
-
-## Backend
-
-```bash
+# Backend
 cd backend
-
+python -m venv venv && source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
+uvicorn app.main:app --reload        # → http://localhost:8000
 
-uvicorn app.main:app --reload
+# Frontend
+cd ../frontend
+npm install && npm run dev           # → http://localhost:5173
+
+# Or, run everything via Docker
+docker compose up --build
 ```
 
----
-
-## Frontend
-
-```bash
-cd frontend
-
-npm install
-
-npm run dev
+**.env (backend):**
+```env
+GOOGLE_API_KEY=your_gemini_api_key
+MODEL_PATH=./ai/models/roberta
+MODE=production
 ```
 
----
-
-# 📡 API
-
-## POST
-
-```
-/api/predict
-```
-
-Example
+## 📡 API — `POST /api/predict`
 
 ```json
-{
-  "text": "News article...",
-  "mode": "production"
-}
+// Request
+{ "text": "News article...", "mode": "production" }
+
+// Response
+{ "prediction": "Fake", "confidence": 97.61, "model": "RoBERTa",
+  "reasoning": "Generated using Google Gemini", "sources": [] }
 ```
 
----
-
-# 📚 Dataset
-
-- **WELFake Dataset**
-- 72,134 News Articles
-- Binary Classification (Real / Fake)
+`production` mode → fast inference with confidence + explanation. `research` mode → full pipeline, intermediate outputs, model comparison.
 
 ---
 
-# 📄 Research
+## 📈 Highlights
 
-This repository accompanies our research on:
+- Benchmarked **10 NLP models** across ML, DL, and Transformer paradigms
+- **97.61% accuracy** with fine-tuned RoBERTa
+- RAG + Gemini for evidence-supported, explainable verdicts
+- Full-stack deployment: React + FastAPI, Dockerized
 
-**Comparative Evaluation of Machine Learning, Deep Learning, and Transformer Models for Fake News Detection with an Agentic AI-Assisted Verification Framework**
+## 🔮 Future Improvements
 
-The proposed framework combines:
+Multilingual & multimodal (text + image) detection · real-time monitoring · browser extension · knowledge graph integration · model quantization · cloud deployment (AWS)
 
-- Transformer-based Classification
-- Agentic AI
-- Retrieval-Augmented Generation (RAG)
-- Explainable AI
-- Evidence-supported Verification
+## 🤝 Contributing
 
----
-
-# 🔮 Future Improvements
-
-- Multilingual Verification
-- Image + Text Fake News Detection
-- Knowledge Graph Integration
-- Multi-Agent Collaboration
-- Live News Monitoring
-- Real-time Fact Checking APIs
+Fork → branch → commit → PR. Contributions welcome!
 
 ---
 
-# 👨‍💻 Authors
+## 👨‍💻 Author
 
-**Yug Saxena**
+**Yug Saxena** — B.Tech Information Technology, JSS Academy of Technical Education, Noida
+GitHub: https://github.com/yugsaxena102
 
-B.Tech Information Technology
+## 📄 License
 
-JSS Academy of Technical Education, Noida
+MIT License — see `LICENSE` for details.
 
----
+<div align="center">
 
-# ⭐ Support
+⭐ If you found this project useful, consider giving it a star!
 
-If you found this project useful, consider giving it a ⭐ on GitHub.
-
-
-
-
-
+</div>
