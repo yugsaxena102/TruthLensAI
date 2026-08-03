@@ -1,0 +1,53 @@
+# Node.js
+node_modules/
+dist/
+dist-ssr/
+*.local
+.eslintcache
+
+# Python Caches & Environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+.env
+
+# Jupyter Notebook Caches
+.ipynb_checkpoints/
+
+# Model Files & Large weights (but keep placeholder gitkeeps)
+*.h5
+*.bin
+*.pt
+*.pth
+*.pkl
+*.safetensors
+*.onnx
+*.model
+*.ckpt
+*.pb
+*.tflite
+*.keras
+ai/models/**/*.json
+!**/saved_models/**/*.gitkeep
+
+# Large Data Artifacts
+ai/data/*.csv
+!ai/data/.gitkeep
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Additional environment and cache ignores
+.pytest_cache/
+.tmp/
+backend/.venv/
+.env
+backend/.env
+frontend/.env
+
+backend/output.json
