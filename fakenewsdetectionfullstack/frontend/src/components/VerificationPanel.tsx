@@ -43,7 +43,6 @@ const getVerdictStyles = (verdict: string) => {
     };
   }
 
-  // Default: Insufficient Evidence / Unknown
   return {
     container: "from-zinc-500/5 to-zinc-500/10 border-zinc-200/50 dark:border-zinc-800/50",
     badge: "bg-zinc-600 text-white shadow-zinc-500/30 border border-zinc-500",
@@ -60,35 +59,35 @@ export const VerificationPanel: React.FC<VerificationPanelProps> = ({ verificati
 
   return (
     <div className={`premium-card p-6 lg:p-10 animate-fadeIn transition-colors bg-gradient-to-br ${styles.container} backdrop-blur-xl relative overflow-hidden group`}>
-      {/* Decorative background element */}
       <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 dark:bg-white/5 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none transition-transform duration-1000 group-hover:scale-110"></div>
 
       <div className="space-y-8 relative z-10">
         
-        {/* Verdict & Confidence Section */}
-        <div className="flex flex-col lg:flex-row gap-6">
-          
-          {/* Verdict Card */}
-          <div className="flex-1 bg-zinc-50/80 dark:bg-zinc-900/80 p-6 rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm flex items-center gap-5 relative overflow-hidden">
-            <div className={`p-3.5 rounded-xl ${styles.bgIcon} ${styles.icon}`}>
-              <VerdictIcon size={28} />
-            </div>
-            <div>
-              <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest block mb-1">
-                Final Verdict
-              </span>
-              <span className={`inline-flex items-center text-sm font-bold uppercase px-3 py-1 rounded-md shadow-sm ${styles.badge} tracking-wider`}>
-                {verification.verdict}
-              </span>
-            </div>
+        {/* 1. Agentic AI Verification (Verdict) */}
+        <div className="bg-zinc-50/80 dark:bg-zinc-900/80 p-6 rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm flex items-center gap-5 relative overflow-hidden">
+          <div className={`p-3.5 rounded-xl ${styles.bgIcon} ${styles.icon}`}>
+            <VerdictIcon size={28} />
           </div>
+          <div>
+            <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest block mb-1">
+              Agentic AI Verification
+            </span>
+            <span className={`inline-flex items-center text-sm font-bold uppercase px-3 py-1 rounded-md shadow-sm ${styles.badge} tracking-wider`}>
+              {verification.verdict}
+            </span>
+          </div>
+        </div>
 
-          {/* Verification Confidence */}
-          <div className="flex-1 bg-zinc-50/80 dark:bg-zinc-900/80 p-6 rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm flex flex-col justify-center">
+        <div className="h-px w-full bg-gradient-to-r from-zinc-200 via-zinc-200 to-transparent dark:from-zinc-800 dark:via-zinc-800 dark:to-transparent opacity-70"></div>
+
+        <div className="flex flex-col gap-8">
+          
+          {/* 5. Confidence */}
+          <div className="bg-zinc-50/80 dark:bg-zinc-900/80 p-6 rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm flex flex-col justify-center">
             <div className="flex justify-between items-end mb-3">
               <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest flex items-center">
                 <Target size={14} className="mr-1.5" />
-                Confidence Score
+                Agentic Confidence
               </span>
               <span className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 leading-none">
                 {verification.confidence}%
@@ -99,54 +98,27 @@ export const VerificationPanel: React.FC<VerificationPanelProps> = ({ verificati
                 className={`h-full rounded-full transition-all duration-1000 ease-out ${styles.bar} relative overflow-hidden`}
                 style={{ width: `${Math.min(verification.confidence, 100)}%` }}
               >
-                {/* Shimmer effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Divider */}
-        <div className="h-px w-full bg-gradient-to-r from-zinc-200 via-zinc-200 to-transparent dark:from-zinc-800 dark:via-zinc-800 dark:to-transparent opacity-70"></div>
-
-        {/* Content Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          
-          <div className="space-y-8">
-            {/* Summary */}
-            <div>
-              <h4 className="flex items-center text-xs font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-widest mb-3">
-                <FileText size={16} className="mr-2 text-zinc-500" />
-                Executive Summary
-              </h4>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed bg-zinc-50/50 dark:bg-zinc-900/50 p-5 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
-                {verification.summary}
-              </p>
-            </div>
-
-            {/* Trusted Sources */}
-            {verification.sources.length > 0 && (
-              <div>
-                <h4 className="flex items-center text-xs font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-widest mb-3">
-                  <span className="flex items-center justify-center bg-zinc-800 text-white dark:bg-zinc-200 dark:text-zinc-900 rounded-full w-5 h-5 mr-2 text-[10px] shadow-sm">
-                    {verification.sources.length}
-                  </span>
-                  Verified Sources
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2.5">
-                  {verification.sources.map((source, index) => (
-                    <SourceBadge key={index} source={source} />
-                  ))}
-                </div>
-              </div>
-            )}
+          {/* 2. Verification Summary */}
+          <div>
+            <h4 className="flex items-center text-xs font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-widest mb-3">
+              <FileText size={16} className="mr-2 text-zinc-500" />
+              Verification Summary
+            </h4>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed bg-zinc-50/50 dark:bg-zinc-900/50 p-5 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
+              {verification.summary}
+            </p>
           </div>
 
-          {/* Reasoning */}
+          {/* 4. Reasoning */}
           <div>
             <h4 className="flex items-center text-xs font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-widest mb-3">
               <Search size={16} className="mr-2 text-zinc-500" />
-              Agentic Reasoning Process
+              Reasoning Process
             </h4>
             <div className="bg-zinc-50/80 dark:bg-zinc-900/80 p-6 rounded-2xl border-l-4 border-l-zinc-500 border-y border-y-zinc-200 border-r border-r-zinc-200 dark:border-y-zinc-800 dark:border-r-zinc-800 shadow-sm relative">
               <div className="absolute top-4 right-4 text-zinc-200 dark:text-zinc-800">
@@ -157,6 +129,23 @@ export const VerificationPanel: React.FC<VerificationPanelProps> = ({ verificati
               </p>
             </div>
           </div>
+
+          {/* 3. Trusted Sources */}
+          {verification.sources.length > 0 && (
+            <div className="flex flex-col">
+              <h4 className="flex items-center text-xs font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-widest mb-3">
+                <span className="flex items-center justify-center bg-zinc-800 text-white dark:bg-zinc-200 dark:text-zinc-900 rounded-full w-5 h-5 mr-2 text-[10px] shadow-sm">
+                  {verification.sources.length}
+                </span>
+                Trusted Sources
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-2.5 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                {verification.sources.map((source, index) => (
+                  <SourceBadge key={index} source={source} />
+                ))}
+              </div>
+            </div>
+          )}
 
         </div>
 

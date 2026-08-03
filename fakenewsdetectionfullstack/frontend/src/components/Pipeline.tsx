@@ -64,7 +64,7 @@ export const Pipeline: React.FC<PipelineProps> = ({ currentStep, isAnalyzing, mo
       </div>
 
       {/* Pipeline Grid Workflow */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-4 w-full">
         {steps.map((step) => {
           const Icon = step.icon;
           
@@ -80,7 +80,7 @@ export const Pipeline: React.FC<PipelineProps> = ({ currentStep, isAnalyzing, mo
               key={step.id}
               className={`relative flex flex-col p-4 rounded-xl transition-all duration-300 border ${
                 isActive
-                  ? "bg-white dark:bg-zinc-800 border-blue-500 shadow-md transform scale-[1.02] z-10"
+                  ? "bg-white dark:bg-zinc-800 border-blue-500 shadow-lg transform scale-[1.02] z-10"
                   : isCompleted
                   ? "bg-zinc-50 dark:bg-zinc-900/50 border-zinc-300 dark:border-zinc-700"
                   : "bg-transparent border-dashed border-zinc-200 dark:border-zinc-800 opacity-60"
@@ -120,42 +120,57 @@ export const Pipeline: React.FC<PipelineProps> = ({ currentStep, isAnalyzing, mo
         })}
       </div>
 
-      {/* Under-pipeline detail logs */}
-      <div className="mt-8 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-950 shadow-inner group">
-        <div className="flex items-center px-4 py-2 border-b border-zinc-800 bg-black/40">
-          <div className="flex space-x-1.5 mr-4">
-            <div className="w-2.5 h-2.5 rounded-full bg-zinc-700"></div>
-            <div className="w-2.5 h-2.5 rounded-full bg-zinc-700"></div>
-            <div className="w-2.5 h-2.5 rounded-full bg-zinc-700"></div>
+      {/* SYSTEM TERMINAL (macOS Style) */}
+      <div className="mt-8 rounded-xl overflow-hidden border border-[#2d2d2d] dark:border-[#1e1e1e] bg-[#1e1e1e] shadow-2xl relative font-mono text-[13px] leading-relaxed tracking-wide">
+        
+        {/* macOS Terminal Header */}
+        <div className="flex items-center justify-between px-4 py-2.5 bg-gradient-to-b from-[#3a3a3a] to-[#2d2d2d] border-b border-[#111]">
+          {/* Traffic Lights */}
+          <div className="flex space-x-2">
+            <div className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e] shadow-sm"></div>
+            <div className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123] shadow-sm"></div>
+            <div className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29] shadow-sm"></div>
           </div>
-          <p className="text-[10px] font-mono text-zinc-500 tracking-wider">SYSTEM_TERMINAL</p>
+          {/* Title */}
+          <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center pointer-events-none">
+            <span className="text-[12px] font-semibold text-[#aaa] tracking-wide">truthlens-ai — bash — 80×24</span>
+          </div>
         </div>
-        <div className="p-5 text-xs font-mono text-zinc-300 h-40 overflow-y-auto space-y-2">
-          <p className="text-zinc-100 font-bold mb-3 flex items-center">
-            <span className="mr-2 text-blue-500">❯</span> STARTING ANALYSIS PIPELINE
+
+        {/* Terminal Content */}
+        <div className="p-5 h-48 overflow-y-auto space-y-2.5 text-[#cccccc] selection:bg-[#4d4d4d]">
+          <p className="text-[#a6e22e] font-bold mb-3 flex items-center">
+            <span className="mr-2 text-[#66d9ef]">user@truthlens ~$</span> ./run_pipeline.sh
           </p>
+          
+          <p className="text-zinc-100 font-bold mb-3 flex items-center text-[11px] uppercase tracking-wider text-opacity-80">
+            <span className="mr-2 text-[#66d9ef]">❯</span> Starting Analysis Pipeline
+          </p>
+
           {!isAnalyzing && currentStep === 0 && (
-            <p className="text-zinc-500">System idle. Ready to analyze news article text...</p>
+            <p className="text-[#75715e]">System idle. Ready to analyze news article text...</p>
           )}
+
           {isAnalyzing && currentStep === 1 && (
-            <p className="text-blue-400 flex items-center">
-              <span className="animate-spin mr-2">◒</span> [PREPROCESSING] Cleaning text corpus, loading tokenizer...
+            <p className="text-[#66d9ef] flex items-center">
+              <span className="animate-spin mr-2">◒</span> <span className="text-[#e6db74] mr-2">[PREPROCESSING]</span> Cleaning text corpus, loading tokenizer...
             </p>
           )}
+
           {mode === "production" ? (
             <>
               {isAnalyzing && currentStep === 2 && (
-                <p className="text-blue-400 flex items-center">
-                  <span className="animate-spin mr-2">◒</span> [MODEL] Forwarding RoBERTa embedding matrix weights...
+                <p className="text-[#66d9ef] flex items-center">
+                  <span className="animate-spin mr-2">◒</span> <span className="text-[#e6db74] mr-2">[MODEL]</span> Forwarding RoBERTa embedding matrix weights...
                 </p>
               )}
               {isAnalyzing && currentStep === 3 && (
                 <>
-                  <p className="text-blue-400">[XAI] Running attribution algorithm...</p>
-                  <p className="text-zinc-300">[TAVILY] Generating search queries for verification...</p>
-                  <p className="text-zinc-300">[EVIDENCE] Retrieving trusted sources...</p>
-                  <p className="text-indigo-400 flex items-center">
-                    <span className="animate-pulse mr-2">●</span> [GEMINI] Analyzing evidence for final verdict...
+                  <p className="text-[#66d9ef]"><span className="text-[#fd971f] mr-2">[XAI]</span> Running attribution algorithm...</p>
+                  <p className="text-[#f8f8f2]"><span className="text-[#ae81ff] mr-2">[TAVILY]</span> Generating search queries for verification...</p>
+                  <p className="text-[#f8f8f2]"><span className="text-[#a6e22e] mr-2">[EVIDENCE]</span> Retrieving trusted sources...</p>
+                  <p className="text-[#f92672] flex items-center font-bold">
+                    <span className="animate-pulse mr-2">●</span> <span className="mr-2">[GEMINI]</span> Analyzing evidence for final verdict...
                   </p>
                 </>
               )}
@@ -163,34 +178,34 @@ export const Pipeline: React.FC<PipelineProps> = ({ currentStep, isAnalyzing, mo
           ) : (
             <>
               {isAnalyzing && currentStep === 2 && (
-                <p className="text-blue-400 flex items-center"><span className="animate-spin mr-2">◒</span> [MODEL 1] Evaluating BERT transformer model on sequence...</p>
+                <p className="text-[#66d9ef] flex items-center"><span className="animate-spin mr-2">◒</span> <span className="text-[#e6db74] mr-2">[MODEL 1]</span> Evaluating BERT transformer model on sequence...</p>
               )}
               {isAnalyzing && currentStep === 3 && (
-                <p className="text-blue-400 flex items-center"><span className="animate-spin mr-2">◒</span> [MODEL 2] Running DistilBERT token evaluations...</p>
+                <p className="text-[#66d9ef] flex items-center"><span className="animate-spin mr-2">◒</span> <span className="text-[#e6db74] mr-2">[MODEL 2]</span> Running DistilBERT token evaluations...</p>
               )}
               {isAnalyzing && currentStep === 4 && (
-                <p className="text-blue-400 flex items-center"><span className="animate-spin mr-2">◒</span> [MODEL 3] Forwarding RoBERTa embedding matrix weights...</p>
+                <p className="text-[#66d9ef] flex items-center"><span className="animate-spin mr-2">◒</span> <span className="text-[#e6db74] mr-2">[MODEL 3]</span> Forwarding RoBERTa embedding matrix weights...</p>
               )}
               {isAnalyzing && currentStep === 5 && (
-                <p className="text-indigo-400 font-bold flex items-center">
-                  <span className="animate-pulse mr-2">●</span> [VOTING] Aggregating results. Evaluating consensus...
+                <p className="text-[#ae81ff] font-bold flex items-center">
+                  <span className="animate-pulse mr-2">●</span> <span className="mr-2">[VOTING]</span> Aggregating results. Evaluating consensus...
                 </p>
               )}
               {isAnalyzing && currentStep === 6 && (
                 <>
-                  <p className="text-blue-400">[XAI] Running SHAP/LIME feature attributions...</p>
-                  <p className="text-zinc-300">[TAVILY] Generating search queries...</p>
-                  <p className="text-zinc-300">[EVIDENCE] Retrieving trusted sources...</p>
-                  <p className="text-indigo-400 flex items-center">
-                    <span className="animate-pulse mr-2">●</span> [GEMINI] Analyzing evidence for final verdict...
+                  <p className="text-[#66d9ef]"><span className="text-[#fd971f] mr-2">[XAI]</span> Running SHAP/LIME feature attributions...</p>
+                  <p className="text-[#f8f8f2]"><span className="text-[#ae81ff] mr-2">[TAVILY]</span> Generating search queries...</p>
+                  <p className="text-[#f8f8f2]"><span className="text-[#a6e22e] mr-2">[EVIDENCE]</span> Retrieving trusted sources...</p>
+                  <p className="text-[#f92672] flex items-center font-bold">
+                    <span className="animate-pulse mr-2">●</span> <span className="mr-2">[GEMINI]</span> Analyzing evidence for final verdict...
                   </p>
                 </>
               )}
             </>
           )}
           {!isAnalyzing && currentStep === completedTarget + 1 && (
-            <p className="text-green-400 font-bold mt-2 flex items-center">
-              <CheckCircle size={14} className="mr-2" /> [SUCCESS] Analysis completed. Final result loaded and verified.
+            <p className="text-[#a6e22e] font-bold mt-2 flex items-center">
+              <CheckCircle size={14} className="mr-2 text-[#a6e22e]" /> <span className="mr-2">[SUCCESS]</span> Analysis completed. Final result loaded and verified.
             </p>
           )}
         </div>

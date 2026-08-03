@@ -52,9 +52,9 @@ USER_AGENT = (
     "Chrome/138.0 Safari/537.36"
 )
 
-MAX_WORKERS = 5
+MAX_WORKERS = 10
 
-MAX_CONTENT_LENGTH = 5000
+MAX_CONTENT_LENGTH = 500
 
 BLOCKED_PATTERNS = (
     "access denied",

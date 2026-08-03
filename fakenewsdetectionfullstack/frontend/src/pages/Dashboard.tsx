@@ -23,23 +23,54 @@ import {
   Legend, 
   ResponsiveContainer 
 } from "recharts";
+import { useNavigate } from "react-router-dom";
 import { truthLensApi } from "../services/api";
 import type { AnalyticsResponse, HistoryItem } from "../services/api";
 
+const DEFAULT_ANALYTICS: AnalyticsResponse = {
+  total_predictions: 0,
+  fake_percentage: 0,
+  real_percentage: 0,
+  average_confidence: 0,
+  average_inference_time: 0,
+  distribution_pie: {},
+  model_performance_bar: {},
+  timeline_line: [],
+  current_mode: "production"
+};
+
 export const Dashboard: React.FC = () => {
-  const [analytics, setAnalytics] = useState<AnalyticsResponse | null>(null);
+  const [analytics, setAnalytics] = useState<AnalyticsResponse>(DEFAULT_ANALYTICS);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const navigate = useNavigate();
 
   const fetchDashboardData = async () => {
     setLoading(true);
+    setError(false);
     try {
-      const analyticsData = await truthLensApi.getAnalytics();
-      const historyData = await truthLensApi.getHistory();
-      setAnalytics(analyticsData);
-      setHistory(historyData);
+      const [analyticsResult, historyResult] = await Promise.allSettled([
+        truthLensApi.getAnalytics(),
+        truthLensApi.getHistory()
+      ]);
+
+      if (analyticsResult.status === 'fulfilled' && analyticsResult.value) {
+        setAnalytics(analyticsResult.value);
+      } else {
+        console.error("Analytics fetch failed:", analyticsResult.status === 'rejected' ? analyticsResult.reason : 'Empty response');
+        setError(true);
+      }
+
+      if (historyResult.status === 'fulfilled' && historyResult.value) {
+        setHistory(Array.isArray(historyResult.value) ? historyResult.value : []);
+      } else {
+        console.error("History fetch failed:", historyResult.status === 'rejected' ? historyResult.reason : 'Empty response');
+        setHistory([]);
+      }
     } catch (e) {
-      console.error(e);
+      console.error("Unexpected error fetching dashboard data:", e);
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -48,20 +79,6 @@ export const Dashboard: React.FC = () => {
   useEffect(() => {
     fetchDashboardData();
   }, []);
-
-  if (loading || !analytics) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6 animate-fadeIn">
-        <div className="relative w-12 h-12">
-          <div className="absolute inset-0 rounded-full border-2 border-zinc-200 dark:border-zinc-800"></div>
-          <div className="absolute inset-0 rounded-full border-2 border-t-zinc-900 dark:border-t-zinc-100 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
-        </div>
-        <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-          Loading command center...
-        </p>
-      </div>
-    );
-  }
 
   const PIE_COLORS = ["#ef4444", "#22c55e"]; // Red vs Green
 
@@ -81,9 +98,21 @@ export const Dashboard: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
-          <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Overview
-          </h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+              Overview
+            </h2>
+            {loading && (
+              <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 text-[10px] font-medium uppercase tracking-wider animate-pulse">
+                <RefreshCw size={10} className="animate-spin" /> Updating
+              </span>
+            )}
+            {error && !loading && (
+              <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 text-[10px] font-medium uppercase tracking-wider">
+                <ShieldAlert size={10} /> Live Data Unavailable
+              </span>
+            )}
+          </div>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
             Real-time telemetry and validation precision across classifier models.
           </p>
@@ -91,11 +120,66 @@ export const Dashboard: React.FC = () => {
         <button
           onClick={fetchDashboardData}
           className="btn-secondary self-start"
+          disabled={loading}
         >
-          <RefreshCw size={14} />
+          <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
           <span>Refresh Data</span>
         </button>
       </div>
+
+      {/* Quick History Access */}
+      {history.length > 0 && (() => {
+        const latestFake = history.find(item => item.prediction === 'Fake');
+        const latestVerification = history[0];
+
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fadeIn">
+            {latestFake && (
+              <div className="premium-card p-6 border-l-4 border-l-red-500 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold text-red-500 uppercase tracking-wider flex items-center gap-1.5">
+                      <ShieldAlert size={14} /> Latest Fake News Alert
+                    </span>
+                    <span className="text-[10px] text-zinc-500">{latestFake.date}</span>
+                  </div>
+                  <p className="text-sm text-zinc-700 dark:text-zinc-300 line-clamp-2 italic mb-4">
+                    "{latestFake.text_snippet}"
+                  </p>
+                </div>
+                <button 
+                  onClick={() => navigate('/single-analysis', { state: { autoAnalyzeText: latestFake.input_text, mode: latestFake.mode } })}
+                  className="btn-primary w-full sm:w-auto bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50 border border-red-200 dark:border-red-900/50"
+                >
+                  Continue from last fake news analysis
+                </button>
+              </div>
+            )}
+            
+            {(!latestFake || latestFake.id !== latestVerification.id) && (
+              <div className={`premium-card p-6 border-l-4 ${latestVerification.prediction === 'Fake' ? 'border-l-red-500' : 'border-l-green-500'} flex flex-col justify-between`}>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 ${latestVerification.prediction === 'Fake' ? 'text-red-500' : 'text-green-500'}`}>
+                      <FileText size={14} /> Latest Verification
+                    </span>
+                    <span className="text-[10px] text-zinc-500">{latestVerification.date}</span>
+                  </div>
+                  <p className="text-sm text-zinc-700 dark:text-zinc-300 line-clamp-2 italic mb-4">
+                    "{latestVerification.text_snippet}"
+                  </p>
+                </div>
+                <button 
+                  onClick={() => navigate('/single-analysis', { state: { autoAnalyzeText: latestVerification.input_text, mode: latestVerification.mode } })}
+                  className="btn-secondary w-full sm:w-auto"
+                >
+                  Reopen latest analysis
+                </button>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 stagger-children">

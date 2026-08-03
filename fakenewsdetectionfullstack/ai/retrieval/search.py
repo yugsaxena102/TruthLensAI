@@ -77,7 +77,7 @@ KEYWORD_EXTRACTOR = yake.KeywordExtractor(
 # Constants
 # ----------------------------------------------------------------------
 
-MAX_RESULTS = 10
+MAX_RESULTS = 5
 
 SEARCH_DEPTH = "advanced"
 

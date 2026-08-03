@@ -17,8 +17,9 @@ from __future__ import annotations
 import json
 import logging
 import os
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from typing import Any, Dict, List, Optional
+import time
 
 from dotenv import load_dotenv
 from google import genai
@@ -204,6 +205,8 @@ class VerificationResult:
 
     sources: List[SourceReference]
 
+    timings: Dict[str, float] = field(default_factory=dict)
+
     def to_dict(self):
 
         return {
@@ -288,6 +291,8 @@ class VerificationService:
                         "temperature": 0,
 
                         "response_mime_type": "application/json",
+
+                        "automatic_function_calling": {"disable": True},
 
                     },
 
@@ -437,6 +442,7 @@ class VerificationService:
 
             )
 
+        t0 = time.perf_counter()
         prompt = build_verification_prompt(
 
             claim=claim,
@@ -448,10 +454,17 @@ class VerificationService:
             evidence=evidence,
 
         )
+        t1 = time.perf_counter()
 
         raw_response = self._call_gemini(prompt)
+        t2 = time.perf_counter()
 
         result = self._parse_response(raw_response)
+
+        result.timings = {
+            "prompt_building_ms": round((t1 - t0) * 1000.0, 1),
+            "gemini_api_ms": round((t2 - t1) * 1000.0, 1)
+        }
 
         logger.info(
             "Verification completed."

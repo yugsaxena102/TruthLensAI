@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
   Database, 
   Cpu, 
@@ -8,10 +9,29 @@ import {
   Sparkles,
   Link2,
   MessageSquare,
-  Network
+  Network,
+  Clock,
+  AlertTriangle,
+  CheckCircle,
+  ArrowRight
 } from "lucide-react";
+import { truthLensApi } from "../services/api";
+import type { HistoryItem } from "../services/api";
 
 export const About: React.FC = () => {
+  const navigate = useNavigate();
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+
+  useEffect(() => {
+    truthLensApi.getHistory().then((data) => {
+      setHistory(Array.isArray(data) ? data : []);
+    }).catch(console.error);
+  }, []);
+
+  const handleContinue = (item: HistoryItem) => {
+    navigate('/single-analysis', { state: { autoAnalyzeText: item.input_text, mode: item.mode } });
+  };
+
   const mlModels = [
     { name: "XGBoost", description: "eXtreme Gradient Boosting model optimizing tree ensembles with regularized gradient learning for structural tabular classification." },
     { name: "Random Forest", description: "Ensemble classification algorithm evaluating bagging decision trees for vocabulary tree splits." },
@@ -58,6 +78,62 @@ export const About: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Quick History Access */}
+      {history.length > 0 && (
+        <div className="space-y-4 animate-slideUp">
+          <h2 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
+            <Clock size={20} className="text-zinc-500" /> Recent Activity
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div onClick={() => handleContinue(history[0])} className="premium-card p-6 cursor-pointer group flex flex-col justify-between border-blue-200 dark:border-blue-900/30 hover:border-blue-500 dark:hover:border-blue-500">
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Clock size={16} className="text-blue-500" />
+                  <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">Continue From Last Analysis</span>
+                </div>
+                <p className="text-sm text-zinc-700 dark:text-zinc-300 line-clamp-2">{history[0].text_snippet}</p>
+              </div>
+              <div className="mt-4 flex items-center justify-between text-xs text-zinc-500">
+                <span>{history[0].date} {history[0].time}</span>
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+
+            {history.filter(h => h.prediction === 'Fake').slice(0, 1).map(item => (
+              <div key={item.id} onClick={() => handleContinue(item)} className="premium-card p-6 cursor-pointer group flex flex-col justify-between hover:border-red-500 dark:hover:border-red-500">
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <AlertTriangle size={16} className="text-red-500" />
+                    <span className="text-sm font-semibold text-red-600 dark:text-red-400">Recent Fake News</span>
+                  </div>
+                  <p className="text-sm text-zinc-700 dark:text-zinc-300 line-clamp-2">{item.text_snippet}</p>
+                </div>
+                <div className="mt-4 flex items-center justify-between text-xs text-zinc-500">
+                  <span>{item.date} {item.time}</span>
+                  <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            ))}
+
+            {history.filter(h => h.prediction === 'Real').slice(0, 1).map(item => (
+              <div key={item.id} onClick={() => handleContinue(item)} className="premium-card p-6 cursor-pointer group flex flex-col justify-between hover:border-green-500 dark:hover:border-green-500">
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <CheckCircle size={16} className="text-green-500" />
+                    <span className="text-sm font-semibold text-green-600 dark:text-green-400">Recent Verifications</span>
+                  </div>
+                  <p className="text-sm text-zinc-700 dark:text-zinc-300 line-clamp-2">{item.text_snippet}</p>
+                </div>
+                <div className="mt-4 flex items-center justify-between text-xs text-zinc-500">
+                  <span>{item.date} {item.time}</span>
+                  <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Dataset & Models Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

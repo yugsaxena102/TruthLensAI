@@ -14,25 +14,30 @@ class HFDownloader:
 
     @staticmethod
     def _check_env():
-        if not HF_REPO_ID:
+        repo_id = os.getenv("HF_REPO_ID")
+        token = os.getenv("HF_TOKEN")
+
+        if not repo_id:
             raise RuntimeError("HF_REPO_ID environment variable not found.")
+
+        return repo_id, token
 
     @staticmethod
     def ensure_transformer(model_name: str, destination: Path):
 
-        HFDownloader._check_env()
     
         if destination.exists():
             return
     
+        repo_id, token = HFDownloader._check_env()
         destination.parent.mkdir(parents=True, exist_ok=True)
     
         print(f"[HF] Downloading transformer: {model_name}")
     
         snapshot_download(
-            repo_id=HF_REPO_ID,
+            repo_id=repo_id,
             repo_type="model",
-            token=HF_TOKEN,
+            token=token,
             allow_patterns=[f"transformers/{model_name}/*"],
             local_dir=str(destination.parent),
         )
@@ -59,16 +64,18 @@ class HFDownloader:
     
         if destination.exists():
             return
+
+        repo_id, token = HFDownloader._check_env()
     
         destination.parent.mkdir(parents=True, exist_ok=True)
     
         print(f"[HF] Downloading ML file: {filename}")
     
         hf_hub_download(
-            repo_id=HF_REPO_ID,
+            repo_id=repo_id,
             repo_type="model",
             filename=f"ml/{filename}",
-            token=HF_TOKEN,
+            token=token,
             local_dir=str(destination.parent),
         )
     
@@ -91,16 +98,18 @@ class HFDownloader:
     
         if destination.exists():
             return
+
+        repo_id, token = HFDownloader._check_env()
     
         destination.parent.mkdir(parents=True, exist_ok=True)
     
         print(f"[HF] Downloading DL file: {filename}")
     
         hf_hub_download(
-            repo_id=HF_REPO_ID,
+            repo_id=repo_id,
             repo_type="model",
             filename=f"dl/{filename}",
-            token=HF_TOKEN,
+            token=token,
             local_dir=str(destination.parent),
         )
     
@@ -124,15 +133,17 @@ class HFDownloader:
         if destination.exists():
             return
 
+        repo_id, token = HFDownloader._check_env()
+
         destination.parent.mkdir(parents=True, exist_ok=True)
 
         print("[HF] Downloading tokenizer.pkl")
 
         hf_hub_download(
-            repo_id=HF_REPO_ID,
+            repo_id=repo_id,
             repo_type="model",
             filename="tokenizer.pkl",
-            token=HF_TOKEN,
+            token=token,
             local_dir=str(destination.parent),
             local_dir_use_symlinks=False,
         )

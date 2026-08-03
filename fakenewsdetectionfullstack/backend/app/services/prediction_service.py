@@ -4,6 +4,7 @@ import hashlib
 import time
 from statistics import mean
 from threading import Lock
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List
 
 from app.schemas.response import (
@@ -103,28 +104,34 @@ def predict_production(text: str) -> ProductionResponse:
         text,
     )
 
+    t_clean_0 = time.perf_counter()
     cleaned = clean_text(text)
+    t_clean_1 = time.perf_counter()
+    time_cleaning_ms = round((t_clean_1 - t_clean_0) * 1000.0, 1)
 
     logger.info("Cleaned Text: %s\n", cleaned)
 
     start_time = time.perf_counter()
 
-    # --------------------------------------------------
-    # ML Prediction
-    # --------------------------------------------------
+    def _run_ml():
+        t0 = time.perf_counter()
+        res = predict_roberta(text)
+        t1 = time.perf_counter()
+        return res, round((t1 - t0) * 1000.0, 1)
 
-    roberta_res = predict_roberta(text)
+    def _run_rag():
+        t0 = time.perf_counter()
+        search_results = run_search(text)
+        t1 = time.perf_counter()
+        retriever_results = run_retriever(text, search_results)
+        t2 = time.perf_counter()
+        return retriever_results, round((t1 - t0) * 1000.0, 1), round((t2 - t1) * 1000.0, 1)
 
-    # --------------------------------------------------
-    # Retrieval Pipeline
-    # --------------------------------------------------
-
-    search_res = run_search(text)
-
-    retriever_res = run_retriever(
-        text,
-        search_res,
-    )
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        f_ml = executor.submit(_run_ml)
+        f_rag = executor.submit(_run_rag)
+        roberta_res, time_ml_ms = f_ml.result()
+        retriever_res, time_search_ms, time_retrieval_ms = f_rag.result()
 
     verification_res = run_verification(
         text,
@@ -206,6 +213,7 @@ def predict_production(text: str) -> ProductionResponse:
 
     )
 
+    t_hist_0 = time.perf_counter()
     _store_history(
 
         _build_history_entry(
@@ -225,6 +233,30 @@ def predict_production(text: str) -> ProductionResponse:
         )
 
     )
+    t_hist_1 = time.perf_counter()
+    time_history_ms = round((t_hist_1 - t_hist_0) * 1000.0, 1)
+
+    time_prompt_ms = verification_res.timings.get("prompt_building_ms", 0.0)
+    time_gemini_ms = verification_res.timings.get("gemini_api_ms", 0.0)
+    time_analytics_ms = 0.0
+
+    total_time_ms = round((time.perf_counter() - t_clean_0) * 1000.0, 1)
+
+    logger.info(
+        "\n=====================================\n"
+        "Timing Summary (Production)\n"
+        "=====================================\n"
+        f"Text Cleaning ............ {time_cleaning_ms:5.1f} ms\n"
+        f"Transformer Models ....... {time_ml_ms:5.1f} ms\n"
+        f"Search ................... {time_search_ms:5.1f} ms\n"
+        f"Evidence Retrieval ....... {time_retrieval_ms:5.1f} ms\n"
+        f"Prompt Building .......... {time_prompt_ms:5.1f} ms\n"
+        f"Gemini API ............... {time_gemini_ms:5.1f} ms\n"
+        f"History Save ............. {time_history_ms:5.1f} ms\n"
+        f"Analytics Update ......... {time_analytics_ms:5.1f} ms\n"
+        f"Total .................... {total_time_ms:5.1f} ms\n"
+        "====================================="
+    )
 
     return response
 
@@ -241,64 +273,71 @@ def predict_research(text: str) -> ResearchResponse:
         text,
     )
 
+    t_clean_0 = time.perf_counter()
     cleaned = clean_text(text)
+    t_clean_1 = time.perf_counter()
+    time_cleaning_ms = round((t_clean_1 - t_clean_0) * 1000.0, 1)
 
     logger.info("Cleaned Text: %s\n", cleaned)
 
     start_time = time.perf_counter()
 
-    # --------------------------------------------------
-    # ML Models
-    # --------------------------------------------------
+    def _run_ml_models():
+        t0 = time.perf_counter()
+        with ThreadPoolExecutor(max_workers=4) as ml_executor:
+            f_bert = ml_executor.submit(predict_bert, text)
+            f_distilbert = ml_executor.submit(predict_distilbert, text)
+            f_roberta = ml_executor.submit(predict_roberta, text)
+            f_xgboost = ml_executor.submit(predict_xgboost, text)
 
-    bert_res = predict_bert(text)
+            b_res = f_bert.result()
+            d_res = f_distilbert.result()
+            r_res = f_roberta.result()
+            x_res = f_xgboost.result()
+        t1 = time.perf_counter()
+        return (b_res, d_res, r_res, x_res), round((t1 - t0) * 1000.0, 1)
+
+    def _run_rag():
+        t0 = time.perf_counter()
+        search_results = run_search(text)
+        t1 = time.perf_counter()
+        retriever_results = run_retriever(text, search_results)
+        t2 = time.perf_counter()
+        return retriever_results, round((t1 - t0) * 1000.0, 1), round((t2 - t1) * 1000.0, 1)
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        f_ml = executor.submit(_run_ml_models)
+        f_rag = executor.submit(_run_rag)
+
+        (bert_res, distilbert_res, roberta_res, xgboost_res), time_ml_ms = f_ml.result()
+        retriever_res, time_search_ms, time_retrieval_ms = f_rag.result()
+
     logger.info(
         "  > BERT       | Prediction: %-4s | Confidence: %5.1f%%",
         bert_res["prediction"],
         bert_res["confidence"],
     )
-
-    distilbert_res = predict_distilbert(text)
     logger.info(
         "  > DistilBERT | Prediction: %-4s | Confidence: %5.1f%%",
         distilbert_res["prediction"],
         distilbert_res["confidence"],
     )
-
-    roberta_res = predict_roberta(text)
     logger.info(
         "  > RoBERTa    | Prediction: %-4s | Confidence: %5.1f%%",
         roberta_res["prediction"],
         roberta_res["confidence"],
     )
-
-    xgboost_res = predict_xgboost(text)
     logger.info(
         "  > XGBoost    | Prediction: %-4s | Confidence: %5.1f%%",
         xgboost_res["prediction"],
         xgboost_res["confidence"],
     )
 
-    # --------------------------------------------------
-    # Majority Voting
-    # --------------------------------------------------
-
     voting_res = _majority_vote(
         bert_res,
         distilbert_res,
         roberta_res,
         xgboost_res,
-    )
-
-    # --------------------------------------------------
-    # Retrieval + Verification
-    # --------------------------------------------------
-
-    search_res = run_search(text)
-
-    retriever_res = run_retriever(
-        text,
-        search_res,
     )
 
     verification_res = run_verification(
@@ -379,6 +418,7 @@ def predict_research(text: str) -> ResearchResponse:
         status="success",
     )
 
+    t_hist_0 = time.perf_counter()
     _store_history(
         _build_history_entry(
             text=text,
@@ -388,6 +428,30 @@ def predict_research(text: str) -> ResearchResponse:
             model_used="BERT + DistilBERT + RoBERTa + XGBoost",
             inference_time_ms=elapsed_ms,
         )
+    )
+    t_hist_1 = time.perf_counter()
+    time_history_ms = round((t_hist_1 - t_hist_0) * 1000.0, 1)
+
+    time_prompt_ms = verification_res.timings.get("prompt_building_ms", 0.0)
+    time_gemini_ms = verification_res.timings.get("gemini_api_ms", 0.0)
+    time_analytics_ms = 0.0
+
+    total_time_ms = round((time.perf_counter() - t_clean_0) * 1000.0, 1)
+
+    logger.info(
+        "\n=====================================\n"
+        "Timing Summary (Research)\n"
+        "=====================================\n"
+        f"Text Cleaning ............ {time_cleaning_ms:5.1f} ms\n"
+        f"Transformer Models ....... {time_ml_ms:5.1f} ms\n"
+        f"Search ................... {time_search_ms:5.1f} ms\n"
+        f"Evidence Retrieval ....... {time_retrieval_ms:5.1f} ms\n"
+        f"Prompt Building .......... {time_prompt_ms:5.1f} ms\n"
+        f"Gemini API ............... {time_gemini_ms:5.1f} ms\n"
+        f"History Save ............. {time_history_ms:5.1f} ms\n"
+        f"Analytics Update ......... {time_analytics_ms:5.1f} ms\n"
+        f"Total .................... {total_time_ms:5.1f} ms\n"
+        "====================================="
     )
 
     return response
