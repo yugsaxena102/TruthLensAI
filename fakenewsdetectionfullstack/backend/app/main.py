@@ -37,7 +37,10 @@ app = FastAPI(
 # CORS configurations for React frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://truth-lens-mtvy8ka0u-yugsaxena2006-3210s-projects.vercel.app",
+        "https://truth-lens-ai-delta.vercel.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
