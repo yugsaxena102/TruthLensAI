@@ -89,7 +89,7 @@ export interface AnalyticsResponse {
 
 // The FastAPI backend base URL. VITE_API_URL supports deployed and Docker environments.
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? "/api";
-
+console.log("TruthLens API_BASE_URL:", API_BASE_URL);
 const client = axios.create({
   baseURL: API_BASE_URL,
   timeout: 0, // No timeout for complex agentic RAG and Gemini verification
