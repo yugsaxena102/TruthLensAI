@@ -56,7 +56,13 @@ export const Dashboard: React.FC = () => {
       ]);
 
       if (analyticsResult.status === 'fulfilled' && analyticsResult.value) {
-        setAnalytics(analyticsResult.value);
+        setAnalytics({
+  ...DEFAULT_ANALYTICS,
+  ...analyticsResult.value,
+  distribution_pie: analyticsResult.value.distribution_pie ?? {},
+  model_performance_bar: analyticsResult.value.model_performance_bar ?? {},
+  timeline_line: analyticsResult.value.timeline_line ?? [],
+});
       } else {
         console.error("Analytics fetch failed:", analyticsResult.status === 'rejected' ? analyticsResult.reason : 'Empty response');
         setError(true);
@@ -82,12 +88,12 @@ export const Dashboard: React.FC = () => {
 
   const PIE_COLORS = ["#ef4444", "#22c55e"]; // Red vs Green
 
-  const pieData = Object.entries(analytics.distribution_pie).map(([key, val]) => ({
+  const pieData = Object.entries(analytics.distribution_pie ?? {}).map(([key, val]) => ({
     name: key,
     value: val,
   }));
 
-  const barData = Object.entries(analytics.model_performance_bar).map(([key, val]) => ({
+  const barData = Object.entries(analytics.model_performance_bar ?? {}).map(([key, val]) => ({
     model: key,
     confidence: val,
   }));
