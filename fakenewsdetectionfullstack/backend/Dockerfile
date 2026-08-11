@@ -6,11 +6,11 @@ WORKDIR /app
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install spaCy model
 RUN python -m spacy download en_core_web_sm
 
 # Download NLTK data
-RUN python -m nltk.downloader \
-    -d /usr/local/share/nltk_data \
+RUN python -m nltk.downloader -d /usr/local/share/nltk_data \
     stopwords \
     wordnet \
     omw-1.4 \
@@ -25,4 +25,4 @@ ENV NLTK_DATA=/usr/local/share/nltk_data
 
 EXPOSE 8000
 
-CMD ["uvicorn","backend.app.main:app","--host","0.0.0.0","--port","8000"]
+CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
