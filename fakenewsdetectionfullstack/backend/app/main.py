@@ -38,9 +38,9 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://truth-lens-mtvy8ka0u-yugsaxena2006-3210s-projects.vercel.app",
         "https://truth-lens-ai-delta.vercel.app",
     ],
+    allow_origin_regex=r"https://truth-lens-.*-yugsaxena2006-3210s-projects\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
